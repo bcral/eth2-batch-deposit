@@ -3,7 +3,7 @@ const assert = require("chai").assert;
 const truffleAssert = require("truffle-assertions");
 
 // 1 gwei fee
-const fee = web3.utils.toWei("1", "gwei");
+const fee = web3.utils.toWei("0", "gwei");
 
 // Fake deposits
 var fakeData = {
@@ -48,15 +48,8 @@ contract("BatchDeposit", async (accounts) => {
 
     assert.equal(
       res.receipt.rawLogs.length,
-      4,
-      "events are not 4 as expected!"
-    );
-
-    // Check that we have fee in the contract balance
-    assert.equal(
-      await web3.eth.getBalance(contract.address),
-      stakefishFee,
-      "fee was not collected by the smart contract"
+      3,
+      "events are not 3 as expected!"
     );
 
     // check owner is account 0
@@ -85,27 +78,6 @@ contract("BatchDeposit", async (accounts) => {
         }
       ),
       "BatchDeposit: Amount is too low"
-    );
-  });
-
-  it("should revert if fee is missing", async () => {
-    let contract = await BatchDeposit.deployed();
-
-    var amountEth = web3.utils.toBN(32 * 3);
-    var amountWei = new web3.utils.BN(web3.utils.toWei(amountEth, "ether"));
-
-    await truffleAssert.reverts(
-      contract.batchDeposit(
-        fakeData.pubkeys,
-        fakeData.creds,
-        fakeData.signatures,
-        fakeData.dataRoots,
-        {
-          value: amountWei,
-          from: accounts[2],
-        }
-      ),
-      "BatchDeposit: Amount is not aligned with pubkeys number"
     );
   });
 
@@ -141,30 +113,4 @@ contract("BatchDeposit", async (accounts) => {
     );
   });
 
-  it("should withdraw the fees", async () => {
-    let contract = await BatchDeposit.deployed();
-
-    let fees = await web3.eth.getBalance(contract.address);
-    let curBal = await web3.eth.getBalance(accounts[6]);
-
-    let res = await contract.withdraw(accounts[6], { from: accounts[2] });
-    assert.equal(
-      res.receipt.rawLogs.length,
-      1,
-      "events are not 1 as expected!"
-    );
-
-    // Check that we have fee in the contract balance
-    assert.equal(
-      await web3.eth.getBalance(contract.address),
-      0,
-      "contract balance is not 0"
-    );
-
-    let newBal = await web3.eth.getBalance(accounts[6]);
-
-    let diff = web3.utils.toBN(newBal).sub(web3.utils.toBN(curBal));
-
-    assert.equal(diff.toString(), fees, "eth has not been trasfered");
-  });
 });

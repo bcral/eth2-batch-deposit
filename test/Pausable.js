@@ -3,7 +3,7 @@ const assert = require("chai").assert;
 const truffleAssert = require("truffle-assertions");
 
 // 1 gwei fee
-const fee = web3.utils.toWei("1", "gwei");
+const fee = web3.utils.toWei("0", "gwei");
 
 contract("BatchDeposit", async (accounts) => {
   it("should not pause contract", async () => {
