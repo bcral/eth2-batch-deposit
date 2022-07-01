@@ -2,12 +2,9 @@ var BatchDeposit = artifacts.require("BatchDeposit");
 const assert = require("chai").assert;
 const truffleAssert = require("truffle-assertions");
 
-// 1 gwei fee
-const fee = web3.utils.toWei("0", "gwei");
-
 // Fake deposits
 var fakeData = {
-  pubkeys:
+  pubkeys: 
     "0xb397443cf61fbb6286550d9ef9b58a033deeb0378fe504ec09978d94eb87aedea244892853b994e27d6f77133fce723ea50e1dfc528fe61d7c0b3bc118f94e7090e1b0b80328a8ec66783cecd74d3fc51459c76f2940dc905b9a32b34220945b881e7056817dce7ac795b592f309c7b681ea7e5eadc5cfd39871112b69103e396ce91d0a3a9a333cb4f213ed43add094",
   creds: "0x00e53ca56e7f6412ca6024989d8a37cb0520d70d7e3472bf08fc629816603b5c",
 
@@ -21,19 +18,12 @@ var fakeData = {
   ],
 };
 
-contract("BatchDeposit", async (accounts) => {
+contract("BatchDeposit Multiple deposits", async (accounts) => {
   it("can perform multiple deposits in one tx", async () => {
     let contract = await BatchDeposit.deployed();
 
     var amountEth = web3.utils.toBN(32 * 3);
     var amountWei = new web3.utils.BN(web3.utils.toWei(amountEth, "ether"));
-
-    var stakefishFee = new web3.utils.BN(fee).mul(
-      // web3.utils.toBN(fakeData.pubkeys.length)
-      web3.utils.toBN("3")
-    );
-
-    amountWei = amountWei.add(stakefishFee);
 
     let res = await contract.batchDeposit(
       fakeData.pubkeys,
@@ -95,22 +85,6 @@ contract("BatchDeposit", async (accounts) => {
     let res = await contract.transferOwnership(accounts[2], {
       from: accounts[0],
     });
-
-    // check owner is account 2
-    assert.equal(
-      await contract.owner(),
-      accounts[2],
-      "contract owner is not changed"
-    );
-  });
-
-  it("should not withdraw", async () => {
-    let contract = await BatchDeposit.deployed();
-
-    await truffleAssert.reverts(
-      contract.withdraw(accounts[6], { from: accounts[1] }),
-      "Ownable: caller is not the owner"
-    );
   });
 
 });

@@ -15,6 +15,7 @@ contract BatchDeposit is Pausable, Ownable {
     uint256 constant PUBKEY_LENGTH = 48;
     uint256 constant SIGNATURE_LENGTH = 96;
     uint256 constant CREDENTIALS_LENGTH = 32;
+    uint256 constant MAX_VALIDATORS = 100;
     uint256 constant DEPOSIT_AMOUNT = 32 ether;
 
     event Withdrawn(address indexed payee, uint256 weiAmount);
@@ -41,6 +42,7 @@ contract BatchDeposit is Pausable, Ownable {
 
         uint256 count = deposit_data_roots.length;
         require(count > 0, "BatchDeposit: You should deposit at least one validator");
+        require(count <= MAX_VALIDATORS, "BatchDeposit: You can deposit max 100 validators at a time");
 
         require(pubkeys.length == count * PUBKEY_LENGTH, "BatchDeposit: Pubkey count don't match");
         require(signatures.length == count * SIGNATURE_LENGTH, "BatchDeposit: Signatures count don't match");

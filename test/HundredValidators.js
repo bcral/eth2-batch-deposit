@@ -23,17 +23,17 @@ var fakeData = {
 };
 
 contract("BatchDeposit", async (accounts) => {
-  it("can deposit 100 validators in one shot", async () => {
+  it("can deposit 1 validator in one shot", async () => {
     let contract = await BatchDeposit.deployed();
 
-    var amountEth = web3.utils.toBN(32 * 2);
+    var amountEth = web3.utils.toBN(32 * 1);
     var amountWei = new web3.utils.BN(web3.utils.toWei(amountEth, "ether"));
 
     var pubkeys = "0x";
     var signatures = "0x";
     var dataRoots = [];
 
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < 1; i++) {
       pubkeys += fakeData.pubkey;
       signatures += fakeData.signature;
       dataRoots.push(fakeData.dataRoots);
@@ -52,9 +52,47 @@ contract("BatchDeposit", async (accounts) => {
 
     assert.equal(
       res.receipt.rawLogs.length,
-      2,
+      1,
       "events are not 1 as expected!"
     );
 
+  });
+
+  contract("BatchDeposit", async (accounts) => {
+    it("can deposit 100 validators in one shot", async () => {
+      let contract = await BatchDeposit.deployed();
+
+      let trx = 100;
+  
+      var amountEth = web3.utils.toBN(32 * trx);
+      var amountWei = new web3.utils.BN(web3.utils.toWei(amountEth, "ether"));
+  
+      var pubkeys = "0x";
+      var signatures = "0x";
+      var dataRoots = [];
+  
+      for (var i = 0; i < trx; i++) {
+        pubkeys += fakeData.pubkey;
+        signatures += fakeData.signature;
+        dataRoots.push(fakeData.dataRoots);
+      }
+  
+      let res = await contract.batchDeposit(
+        pubkeys,
+        fakeData.creds,
+        signatures,
+        dataRoots,
+        {
+          value: amountWei,
+          from: accounts[1],
+        }
+      );
+  
+      assert.equal(
+        res.receipt.rawLogs.length,
+        trx,
+        "events are not 100 as expected!"
+      );
+    });
   });
 });
